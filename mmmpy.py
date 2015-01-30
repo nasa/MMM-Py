@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.3.2
+mmmpy v1.3.3
 Developed & tested with Python 2.7.6-2.7.8
-Last changed 8/27/2014
+Last changed 1/30/2015
     
     
 Author
@@ -36,7 +36,10 @@ matplotlib (1.3.1+), Basemap, struct, calendar, gzip
 
 Change Log
 ----------
-v1.3.2 major changes:
+v1.3.3 major changes (1/30/2015):
+1. Shifting plotting routines to separate display object
+
+v1.3.2 major changes (8/27/2014):
 1. Converted epochtime_to_string() to a public independent function.
 2. Added compute_grid_attributes as a public independent function. This will
    return volumes and areas of 3-D and 2-D grid cells, respectively.
