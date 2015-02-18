@@ -76,11 +76,5 @@ v1.0.1 major changes:
 
 Planned updates
 ---------------
-1. Support two constant longitude or two constant latitude vertical
-   cross-sections in MosaicTile.three_panel_plot(), instead of only separate
-   lat and lon cross-sections.
-2. Add MosaicTile methods that write out and read in subsets of mosaics. For 
-   example, read one or more tiles (stitching them together as necessary),
-   then subset over a smaller domain and write out the result as a separate file,
-   which is also readable by MMM-Py.
+1. Make grib2 reading quicker and more elegant.
 
