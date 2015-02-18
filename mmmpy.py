@@ -334,6 +334,9 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         self.Tile = '?' #MRMS grib2 covers entire contiguous US
         self.Version = 3
         self.Duration = V2_DURATION #MRMS grib2 timing still every 2 min
+        self.Filename = os.path.basename(filename[0]) if not\
+               isinstance(filename, basestring) else os.path.basename(filename)
+        self.Variables = [DEFAULT_VAR]
         gribfile = MosaicGrib(filename, wgrib2_path=wgrib2_path, keep_nc=keep_nc,
                               wgrib2_name=wgrib2_name, verbose=verbose,
                               nc_path=nc_path)
