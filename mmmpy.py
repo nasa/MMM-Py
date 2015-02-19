@@ -4,7 +4,7 @@ Title/Version
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
 mmmpy v1.4
 Developed & tested with Python 2.7.6-2.7.8
-Last changed 2/17/2015
+Last changed 2/18/2015
     
     
 Author
@@ -333,6 +333,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         keep_nc = Set to False to erase netCDFs created by wgrib2
         verbose = Set to True to get text updates on progress
         nc_path = Path to directory where netCDFs will be created
+        lat/lonrange = 2-element lists used to subsection grib data before ingest
         """
         if verbose:
             begin_time = time.time()
@@ -737,6 +738,7 @@ class MosaicGrib(object):
         keep_nc = Set to False to erase netCDFs created by wgrib2
         verbose = Set to True to get text updates on progress
         nc_path = Path to directory where netCDFs will be created
+        lat/lonrange = 2-element lists used to subsection grib data before ingest
         """
         if not isinstance(file_list, basestring):
             self.read_grib_list(file_list, wgrib2_path=wgrib2_path,
@@ -781,6 +783,7 @@ class MosaicGrib(object):
                 if latrange is None and lonrange is None:
                     command = wgrib2_path+wgrib2_name+' '+grib+' -netcdf '+\
                               nc_path+gribf+'.nc'
+                #Subsectioning before reading
                 else:
                     if latrange is None and lonrange is not None:
                         latrange = MRMS_V3_LATRANGE

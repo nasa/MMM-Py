@@ -39,6 +39,6 @@ import mmmpy
 
 To see MMM-Py in action, check out the IPython notebooks provided in this distribution.
 
-MRMS was developed at the NASA Marshall Space Flight Center by Timothy Lang (timothy.j.lang@nasa.gov)
+MMM-Py was developed at the NASA Marshall Space Flight Center by Timothy Lang (timothy.j.lang@nasa.gov)
 
 See LICENSE file for NASA open source license information.

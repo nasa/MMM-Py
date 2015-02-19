@@ -1,6 +1,6 @@
 Change Log
 ----------
-v1.4 major changes (2/17/2015):
+v1.4 major changes (2/18/2015):
 1. Shifted plotting routines to separate MosaicDisplay object.
    To use: display = mmmpy.MosaicDisplay(mosaic_tile_object)
    Then display will have plot_horiz(), plot_vert(), and three_panel_plot() methods.
