@@ -1,4 +1,5 @@
 MMM-Py README
+-------------
 
 The National Oceanic and Atmospheric Administration (NOAA) regularly produces
 national 3D radar reflectivity mosaics via its Multi-Radar/Multi-Sensor (MRMS)
@@ -15,7 +16,9 @@ you can check out the cool storm that just happened.
 For more info about the latest version of MRMS, see:
 https://docs.google.com/document/d/1LeVcn_taIXZgzZb5JgWqaVr0xVs7GmA6RpHcb8ZGiwk/edit
 
-MMM-Py Installation:
+
+MMM-Py Installation
+-------------------
 
 MMM-Py works under Python 2.x on most Mac/Linux setups. Windows installation is currently untested.
 
@@ -34,10 +37,17 @@ will go.
 
 Without wgrib2 MMM-Py can still read legacy MRMS binaries and netCDFs. 
 
+
+Using MMM-Py
+------------
+
 To access everything:
 import mmmpy
 
 To see MMM-Py in action, check out the IPython notebooks provided in this distribution.
+
+The following conference presentation discusses MMM-Py (among other modules):
+https://ams.confex.com/ams/95Annual/webprogram/Paper262779.html 
 
 MMM-Py was developed at the NASA Marshall Space Flight Center by Timothy Lang (timothy.j.lang@nasa.gov)
 
