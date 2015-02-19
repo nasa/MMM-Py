@@ -87,6 +87,8 @@ BASE_PATH = '/Users/tjlang/Documents/Python/mmmpy'
 TMPDIR = BASE_PATH + '/tmpdir/'
 WGRIB2_PATH = BASE_PATH + '/MRMSupdates2015/MRMS_modified_wgrib2_v2.0.1/wgrib2/'
 WGRIB2_NAME = 'wgrib2'
+MRMS_V3_LATRANGE = [20.0, 55.0]
+MRMS_V3_LONRANGE = [-130.0, -60.0]
 
 #v1/v2 changeover occurred on 07/30/2013 around 1600 UTC (epoch = 1375200000)
 #See https://docs.google.com/document/d/1Op3uETOtd28YqZffgvEGoIj0qU6VU966iT_QNUOmqn4/edit
@@ -131,7 +133,8 @@ class MosaicTile(object):
     """
 
     def __init__(self, filename=None, verbose=False, wgrib2_path=WGRIB2_PATH,
-                 keep_nc=True, wgrib2_name=WGRIB2_NAME, nc_path=TMPDIR):
+                 keep_nc=True, wgrib2_name=WGRIB2_NAME, nc_path=TMPDIR,
+                 latrange=None, lonrange=None):
         """
         If initialized with a filename (incl. path), will call
         read_mosaic_netcdf() to populate the class instance.
@@ -146,7 +149,8 @@ class MosaicTile(object):
         if not isinstance(filename, basestring):
             self.read_mosaic_grib(filename, verbose=verbose,
                                   wgrib2_path=wgrib2_path, keep_nc=keep_nc,
-                                  wgrib2_name=wgrib2_name, nc_path=nc_path)
+                                  wgrib2_name=wgrib2_name, nc_path=nc_path,
+                                  latrange=latrange, lonrange=lonrange)
         else:
             try:
                 flag = self.read_mosaic_binary(filename, verbose=verbose)
@@ -156,7 +160,8 @@ class MosaicTile(object):
                         try:
                             self.read_mosaic_grib([filename], verbose=verbose,
                                   wgrib2_path=wgrib2_path, keep_nc=keep_nc,
-                                  wgrib2_name=wgrib2_name, nc_path=nc_path)
+                                  wgrib2_name=wgrib2_name, nc_path=nc_path,
+                                  latrange=latrange, lonrange=lonrange)
                         except:
                             print 'Unknown file format, nothing read'
         
@@ -311,7 +316,8 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         return True
 
     def read_mosaic_grib(self, filename, wgrib2_path=WGRIB2_PATH, keep_nc=True,
-                        wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR):
+                        wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR,
+                        latrange=None, lonrange=None):
         """
         Method that is capable of reading grib2-format MRMS mosaics.
         Relies on MosaicGrib and NetcdfFile classes to do the heavy lifting.
@@ -339,7 +345,8 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         self.Variables = [DEFAULT_VAR]
         gribfile = MosaicGrib(filename, wgrib2_path=wgrib2_path, keep_nc=keep_nc,
                               wgrib2_name=wgrib2_name, verbose=verbose,
-                              nc_path=nc_path)
+                              nc_path=nc_path, latrange=latrange,
+                              lonrange=lonrange)
         #MosaicGrib objects have very similar attributes to MosaicTiles
         varlist = [DEFAULT_VAR, 'Latitude', 'Longitude', 'StartLat', 'StartLon',
                    'LatGridSpacing', 'LonGridSpacing', 'Time', 'nlon', 'nlat',
@@ -720,7 +727,8 @@ class MosaicGrib(object):
     """
     
     def __init__(self, file_list, wgrib2_path=WGRIB2_PATH, keep_nc=True,
-                 wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR):
+                 wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR,
+                 latrange=None, lonrange=None):
         """
         file_list = Single string or list of strings, can be for grib2 or netCDFs
                     created by wgrib2
@@ -733,14 +741,17 @@ class MosaicGrib(object):
         if not isinstance(file_list, basestring):
             self.read_grib_list(file_list, wgrib2_path=wgrib2_path,
                                 keep_nc=keep_nc, wgrib2_name=wgrib2_name,
-                                verbose=verbose, nc_path=nc_path)
+                                verbose=verbose, nc_path=nc_path,
+                                latrange=latrange, lonrange=lonrange)
         else:
             self.read_grib_list([file_list], wgrib2_path=wgrib2_path,
                                 keep_nc=keep_nc, wgrib2_name=wgrib2_name,
-                                verbose=verbose, nc_path=nc_path)
+                                verbose=verbose, nc_path=nc_path,
+                                latrange=latrange, lonrange=lonrange)
 
     def read_grib_list(self, file_list, wgrib2_path=WGRIB2_PATH, keep_nc=True,
-                       wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR):
+                       wgrib2_name=WGRIB2_NAME, verbose=False, nc_path=TMPDIR,
+                       latrange=None, lonrange=None):
         """
         Actual reading of grib2 and netCDF files occurs here. Input arguments and
         keywords same as __init__() method.
@@ -749,6 +760,7 @@ class MosaicGrib(object):
             begin_time = time.time()
         #Make the directory where netCDFs will be stored
         os.system('mkdir '+TMPDIR)
+        tmpf = nc_path+'default.grib2'
         nclist = []
         for grib in file_list if not isinstance(file_list, basestring)\
                 else [file_list]:
@@ -766,8 +778,20 @@ class MosaicGrib(object):
                     gzip_flag = True
                 #wgrib2 call is made via os.system()
                 gribf = os.path.basename(grib)
-                command = wgrib2_path+wgrib2_name+' '+grib+' -netcdf '+\
-                          nc_path+gribf+'.nc'
+                if latrange is None and lonrange is None:
+                    command = wgrib2_path+wgrib2_name+' '+grib+' -netcdf '+\
+                              nc_path+gribf+'.nc'
+                else:
+                    if latrange is None and lonrange is not None:
+                        latrange = MRMS_V3_LATRANGE
+                    elif latrange is not None and lonrange is None:
+                        lonrange = MRMS_V3_LONRANGE
+                    slat = self.convert_array_to_string(latrange)
+                    slon = self.convert_array_to_string(np.array(lonrange)+360.0)
+                    command = wgrib2_path+wgrib2_name+' '+grib+' -small_grib '+\
+                              slon+' '+slat+' '+tmpf+'; '+wgrib2_path+wgrib2_name+\
+                              ' '+tmpf+' -netcdf '+nc_path+gribf+'.nc; '+\
+                              'rm -f '+tmpf
                 if verbose:
                     print '>>>> ', command
                 os.system(command)
@@ -781,6 +805,9 @@ class MosaicGrib(object):
         self.format_data()
         if verbose:
             print 'MosaicGrib:', time.time()-begin_time, 'seconds to run'
+
+    def convert_array_to_string(self, array):
+        return str(np.min(array)) + ':' + str(np.max(array))
 
     def get_height_from_name(self, name):
         """
