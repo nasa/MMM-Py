@@ -142,7 +142,7 @@ class MosaicTile(object):
         its attributes.
         filename: Full path and filename of file.
         verbose: Set to True for text output. Useful for debugging.
-        binary: Set to True to read an MRMS binary file. False = NetCDF
+        Other keywords are described in read_mosaic_grib() method.
         """
         if filename is None:
             return
