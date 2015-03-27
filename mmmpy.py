@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.4
+mmmpy v1.4.1
 Developed & tested with Python 2.7.6-2.7.8
-Last changed 2/18/2015
+Last changed 3/27/2015
     
     
 Author
@@ -46,7 +46,7 @@ import time
 import calendar
 import gzip
 
-VERSION = '1.4'
+VERSION = '1.4.1'
 
 #Hard coding of constants
 DEFAULT_CLEVS = np.arange(15)*5.0
@@ -219,7 +219,7 @@ class MosaicTile(object):
                 self.Version = 2
                 label = element
                 break
-        if self.Version == None:
+        if self.Version is None:
             del self.Version
             if verbose:
                 print 'read_mosaic_netcdf(): Unknown MRMS version, cannot read'
@@ -419,8 +419,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         if verbose:
             _method_header_printout('write_mosaic_binary')
             begin_time = time.time()
-      
-        if full_path_and_filename == None:
+        if full_path_and_filename is None:
             full_path_and_filename = DEFAULT_FILENAME
         elif full_path_and_filename[-3:] != '.gz':
             full_path_and_filename += '.gz'
@@ -619,7 +618,8 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         deprec5 = np.int32(1000).tostring()
         ph = 0 * np.arange(10) + 19000
         placeholder = np.int32(ph).tostring() #10 of these placeholder values
-        header = year+month+day+hour+minute+second+nlon+nlat+nz+deprec1+map_scale+\
+        header = year+month+day+hour+minute+second+nlon+nlat+nz+deprec1+\
+                 map_scale+\
                  deprec2+deprec3+deprec4+StartLon+StartLat+deprec5+dlon+dlat+\
                  dxy_scale+Height+z_scale+placeholder+VarName+VarUnit+var_scale+\
                  missing+nr+rad_name
@@ -792,7 +792,8 @@ class MosaicGrib(object):
                     slat = self.convert_array_to_string(latrange)
                     slon = self.convert_array_to_string(np.array(lonrange)+360.0)
                     command = wgrib2_path+wgrib2_name+' '+grib+' -small_grib '+\
-                              slon+' '+slat+' '+tmpf+'; '+wgrib2_path+wgrib2_name+\
+                              slon+' '+slat+' '+tmpf+'; '+wgrib2_path+\
+                              wgrib2_name+\
                               ' '+tmpf+' -netcdf '+nc_path+gribf+'.nc; '+\
                               'rm -f '+tmpf
                 if verbose:
@@ -885,7 +886,7 @@ class MosaicStitch(MosaicTile):
         Initializes class instance but leaves it to other methods to
         populate the class attributes.
         """
-        MosaicTile.__init__(self, verbose=False)
+        MosaicTile.__init__(self, verbose=verbose)
 
     def help(self):
         _method_header_printout('help')
@@ -898,26 +899,28 @@ class MosaicStitch(MosaicTile):
         print 'except read_mosaic_*() methods are disabled to avoid problems'
         _method_footer_printout()
 
-    def read_mosaic_netcdf(self, filename, verbose=False):
-
+    def read_mosaic_grib(self, filename, verbose=False):
         """Disabled in a MosaicStitch to avoid problems."""
-        
+        _method_header_printout('read_mosaic_grib')
+        print 'To avoid problems with reading individual MosaicTile classes'
+        print 'into a MosaicStitch, this method has been disabled'
+        _method_footer_printout()
+
+    def read_mosaic_netcdf(self, filename, verbose=False):
+        """Disabled in a MosaicStitch to avoid problems."""
         _method_header_printout('read_mosaic_netcdf')
         print 'To avoid problems with reading individual MosaicTile classes'
         print 'into a MosaicStitch, this method has been disabled'
         _method_footer_printout()
 
     def read_mosaic_binary(self, filename, verbose=False):
-
         """Disabled in a MosaicStitch to avoid problems."""
-        
         _method_header_printout('read_mosaic_binary')
         print 'To avoid problems with reading individual MosaicTile classes'
         print 'into a MosaicStitch, this method has been disabled'
         _method_footer_printout()
 
     def stitch_ns(self, n_tile=None, s_tile=None, verbose=False):
-        
         """
         Stitches MosaicTile pair or MosaicStitch pair (or mixed pair) 
         in N-S direction.
@@ -926,7 +929,7 @@ class MosaicStitch(MosaicTile):
         if verbose:
             _method_header_printout(method_name)
         #Check to make sure method was called correctly
-        if n_tile == None or s_tile == None:
+        if n_tile is None or s_tile is None:
             _print_method_called_incorrectly('stitch_ns')
             return
         #Check to make sure np.append() will not fail due to different grids
@@ -945,7 +948,6 @@ class MosaicStitch(MosaicTile):
             _method_footer_printout()
 
     def stitch_we(self, w_tile=None, e_tile=None, verbose=False):
-        
         """
         Stitches MosaicTile pair or MosaicStitch pair (or mixed pair) 
         in W-E direction
@@ -954,7 +956,7 @@ class MosaicStitch(MosaicTile):
         if verbose:
             _method_header_printout(method_name)
         #Check to make sure method was called correctly
-        if w_tile == None or e_tile == None:
+        if w_tile is None or e_tile is None:
             _print_method_called_incorrectly('stitch_we')
             return
         #Check to make sure np.append() will not fail due to different grids
@@ -1126,10 +1128,10 @@ class MosaicDisplay(object):
             else:
                 #Placeholder for future dual-pol functionality
                 cbar.set_label(var)
-        if title == None:
+        if title is None:
             title = epochtime_to_string(self.mosaic.Time) + slevel
         plt.title(title)
-        if save != None:
+        if save is not None:
             plt.savefig(save)
         #Clean up
         if verbose:
@@ -1172,7 +1174,7 @@ class MosaicDisplay(object):
         #Get the cross-section
         vcut, xvar, xrange, xlabel, tlabel = self._get_vertical_slice(var, lat,
                                                    lon, xrange, xlabel, verbose)
-        if vcut == None:
+        if vcut is None:
             return
         #Plot details
         if not title:
@@ -1191,7 +1193,7 @@ class MosaicDisplay(object):
                 #Placeholder for future dual-pol functionality
                 cbar.set_label(var, rotation=90)
         #Finish up
-        if save != None:
+        if save is not None:
             plt.savefig(save)
         if verbose:
             _method_footer_printout()
@@ -1264,7 +1266,7 @@ class MosaicDisplay(object):
             if verbose:
                 _method_footer_printout()
             return
-        if lat == None or lon == None:
+        if lat is None or lon is None:
             print method_name + '(): Need both constant latitude and',\
                   'constant longitude for slices'
             if verbose:
@@ -1283,7 +1285,7 @@ class MosaicDisplay(object):
                       linewidth=linewidth, show_grid=show_grid, clevs=clevs,
                       cmap=cmap, verbose=verbose, area_thresh=area_thresh,
                       resolution=resolution)
-        if xrange_b == None:
+        if xrange_b is None:
             xrange_b = lonrange
         if not xrange_c:
             xrange_c = latrange
@@ -1306,7 +1308,7 @@ class MosaicDisplay(object):
                        xlabel=latlabel, zlabel=zlabel, cmap=cmap, clevs=clevs,
                        verbose=verbose, colorbar_flag=False, title=title_c)
         #Finish up
-        if save != None:
+        if save is not None:
             plt.savefig(save)
         if verbose:
             _method_footer_printout()
@@ -1314,7 +1316,7 @@ class MosaicDisplay(object):
             return fig, ax1, ax2, ax3, m
 
     def _get_slevel(self, level, verbose, print_flag=False):
-        if level == None:
+        if level is None:
             slevel=' Composite '
             index = None
         else:
@@ -1401,18 +1403,18 @@ class MosaicDisplay(object):
                             xrange=None, xlabel=None, verbose=False):
         """Execute slicing, get xvar, vcut"""
         fail = [None, None, None, None, None]
-        if lat == None and lon == None:
+        if lat is None and lon is None:
             print 'plot_vert(): Need a constant latitude or longitude for slice'
             if verbose:
                 _method_footer_printout()
             return fail
-        elif lat != None and lon != None:
+        elif lat is not None and lon is not None:
             print 'plot_vert(): Need either a lat or a lon for slice, not both!'
             if verbose:
                 _method_footer_printout()
             return fail
         else:
-            if lon == None:
+            if lon is None:
                 if self.mosaic.nlon <= 1:
                     print 'Available Longitude range too small to plot'
                     if verbose:
@@ -1428,7 +1430,7 @@ class MosaicDisplay(object):
                     xlabel = 'Longitude (deg)'
                 vcut, xvar, tlabel =\
                       self._get_constant_latitude_cross_section(var, lat)
-            if lat == None:
+            if lat is None:
                 if self.mosaic.nlat <= 1:
                     print 'Available Latitude range too small to plot'
                     if verbose:
@@ -1541,20 +1543,20 @@ def stitch_mosaic_tiles(map_array=None, direction=None, verbose=False):
     #1-D stitching, either N-S or W-E
     if np.rank(map_array) == 1:
         #direction unset or not a string = direction fail
-        if direction == None or isinstance(direction, str) == False:
+        if direction is None or isinstance(direction, str) == False:
             _print_direction_fail(method_name)
             return
         #E-W Stitching only
         if direction.upper() == 'EW' or direction.upper() == 'E' or\
                     direction.upper() == 'W' or direction.upper() == 'WE':
             result = _stitch_1d_array_we(map_array, verbose)
-            if result == None:
+            if result is None:
                 return
         #N-S Stitching only
         elif direction.upper() == 'NS' or direction.upper() == 'N' or\
                     direction.upper() == 'S' or direction.upper() == 'SN':
             result = _stitch_1d_array_ns(map_array, verbose)
-            if result == None:
+            if result is None:
                 return
         #everything else = direction fail
         else:
