@@ -1,0 +1,86 @@
+Change Log
+----------
+v1.4.1 major changes (04/04/2015):
+1. Replaced “==“ and “!=“ tests against None with “is” and “is not” to remove 
+   FutureWarnings.
+2. Added disabled read_mosaic_grib() method to MosaicStitch class.
+3. Swapped numpy.ndim in for numpy.rank as the latter is deprecated.
+
+v1.4 major changes (2/18/2015):
+1. Shifted plotting routines to separate MosaicDisplay object.
+   To use: display = mmmpy.MosaicDisplay(mosaic_tile_object)
+   Then display will have plot_horiz(), plot_vert(), and three_panel_plot() methods.
+2. Added read_mosaic_grib() method to MosaicTile, as well as supporting classes
+   MosaicGrib and NetcdfFile to augment the new method. MMM-Py now can read 
+   grib2-format MRMS mosaics by feeding MosaicTile a list of grib2 files (one for each
+   horizontal slice) from the same volume. 
+3. Despite the vastly modified new data format, the old MMM-Py common data model has been
+   retained, and thus one can still read in a set of grib2s, subsection them, and write
+   out to the old MRMS binary format.  
+4. Moved Change Log to CHANGELOG file.
+
+v1.3.2 major changes (8/27/2014):
+1. Converted epochtime_to_string() to a public independent function.
+2. Added compute_grid_attributes as a public independent function. This will
+   return volumes and areas of 3-D and 2-D grid cells, respectively.
+
+v1.3.1 major changes:
+1. Added output_composite() method to MosaicTile to compute a 2D composite,
+   set it as the only available '3D' field, and write to an MRMS binary file.
+2. Added resolution and area_thresh keywords to plot_horiz() and 
+   three_panel_plot() methods, to allow adjustment of these Basemap 
+   characteristics.
+
+v1.3 major changes
+1. Added write_mosaic_binary() method to MosaicTile. Writes out MRMS-format
+   binary file.
+2. Added capability to read gzipped NetCDF files w/out first decompressing.
+   Also now can read uncompressed binary files.
+3. Added MosaicTile.Tile attribute, which stores the tile number as a string.
+   Number determined based on MRMS Version and StartLat/Lon values.
+   MosaicStitch. Tile attribute becomes a concatenated string of tile numbers
+   upon stitching one or more MosaicTiles together.
+4. Added linewidth keyword to plot_horiz() and three_panel_plot() methods.
+   Can now add/thicken gridlines by setting to something other than default 0.
+5. Added subsection() method to MosaicTile. It subsections a tile/stitch to a
+   smaller grid.
+
+v1.2.1 major changes
+1. Added cross-section information to default plot titles.
+2. Improved the performance of read_mosaic_binary(), ~3x speedup!
+
+v1.2 major changes
+1. Added read_mosaic_binary() method to MosaicTile class. This method reads in
+   gzipped binary MRMS mosaics. It runs in pure Python so it takes a short while
+   (~25 seconds on my Mac laptop) to read in a single v2 tile.
+2. Removed the gridlines (but kept the numbers) from the Basemap plots, 
+   if show_grid=True.
+
+v1.1 major changes
+1. Signficant refactoring of code to offload many tasks to internal methods of 
+   MMM-Py, MosaicTile, and MosaicStitch. This simplified most public
+   methods, reduced the number of local variables appearing in any one method,
+   and reduced duplication in the code.
+2. Added MosaicTile.three_panel_plot() method, which creates a multi-panel 
+   plot that shows one horizontal and two vertical plot cross-sections.
+3. Plotting methods now can return figure, axis, and Basemap objects if you set
+   return_flag=True. This enables the creation of highly customized plots, 
+   including overlays, but still using MMM-Py's plotting methods as a baseline.
+4. Fixed a nasty bug where apparently v2 mosaics were not fully converting from
+   scipy.io.netcdf objects into true ndarrays. This was killing the kernel when
+   attempting to do something quantitative or visual with mrefl3d.
+
+v1.0.2 major changes:
+1. Changed names of Mosaic_Tile to MosaicTile and Mosaic_Stitch to
+   MosaicStitch to conform with PEP8 class naming standards.
+
+v1.0.1 major changes:
+1. Added fix for v1/v2 mosaic changeover on 7/30/2013, so that 
+   v1 mosaics read from NetCDF produced by MRMS_to_CFncdf will correctly 
+   be identified as v1 mosaics.
+
+
+Planned updates
+---------------
+1. Make grib2 reading quicker and more elegant.
+
