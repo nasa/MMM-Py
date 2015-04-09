@@ -4,7 +4,7 @@ Title/Version
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
 mmmpy v1.4.1
 Developed & tested with Python 2.7.6-2.7.8
-Last changed 3/27/2015
+Last changed 04/04/2015
     
     
 Author
@@ -1541,7 +1541,7 @@ def stitch_mosaic_tiles(map_array=None, direction=None, verbose=False):
     if verbose:
         _method_header_printout(method_name)
     #1-D stitching, either N-S or W-E
-    if np.rank(map_array) == 1:
+    if np.ndim(map_array) == 1:
         #direction unset or not a string = direction fail
         if direction is None or isinstance(direction, str) == False:
             _print_direction_fail(method_name)
@@ -1563,7 +1563,7 @@ def stitch_mosaic_tiles(map_array=None, direction=None, verbose=False):
             _print_direction_fail(method_name)
             return
     #map_array fail
-    elif np.rank(map_array) < 1 or np.rank(map_array) > 2:
+    elif np.ndim(map_array) < 1 or np.ndim(map_array) > 2:
         print method_name+'(): map_array is not right,',\
               'use 1- or 2-rank array'
         return

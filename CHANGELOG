@@ -1,9 +1,10 @@
 Change Log
 ----------
-v1.4.1 major changes (3/27/2015):
+v1.4.1 major changes (04/04/2015):
 1. Replaced “==“ and “!=“ tests against None with “is” and “is not” to remove 
    FutureWarnings.
 2. Added disabled read_mosaic_grib() method to MosaicStitch class.
+3. Swapped numpy.ndim in for numpy.rank as the latter is deprecated.
 
 v1.4 major changes (2/18/2015):
 1. Shifted plotting routines to separate MosaicDisplay object.
