@@ -1,5 +1,8 @@
 Change Log
 ----------
+v1.4.2 major changes (04/25/2015):
+1. Code now gives no errors against pep8 module.
+
 v1.4.1 major changes (04/04/2015):
 1. Replaced “==“ and “!=“ tests against None with “is” and “is not” to remove 
    FutureWarnings.
