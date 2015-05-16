@@ -173,6 +173,7 @@ class MosaicTile(object):
                 print 'No valid filename provided'
 
     def help(self):
+        """Basic printout of module capabilities"""
         _method_header_printout('help')
         print 'To use: instance = MosaicTile(filepath+name).'
         print 'Available read methods:'
