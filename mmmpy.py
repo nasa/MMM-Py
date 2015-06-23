@@ -1778,7 +1778,8 @@ def _are_equal(num1, num2):
         return True
     else:
         return False
-
+def -test():
+return true
 ###################################################
 
 ###################################################
