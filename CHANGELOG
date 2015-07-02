@@ -1,5 +1,8 @@
 Change Log
 ----------
+v1.4.3 Major changes (07/02/2015):
+1. Minor fixes to remove some compiler warnings.
+
 v1.4.2 major changes (04/25/2015):
 1. Code now gives no errors against pep8 module.
 

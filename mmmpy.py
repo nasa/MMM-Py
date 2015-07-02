@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.4.2
+mmmpy v1.4.3
 Developed & tested with Python 2.7
-Last changed 04/25/2015
+Last changed 07/02/2015
 
 
 Author
@@ -46,7 +46,7 @@ import time
 import calendar
 import gzip
 
-VERSION = '1.4.2'
+VERSION = '1.4.3'
 
 # Hard coding of constants
 DEFAULT_CLEVS = np.arange(15)*5.0
@@ -1274,9 +1274,6 @@ class MosaicDisplay(object):
         plt.close()  # mpl seems buggy if you don't clean up old windows
         if verbose:
             _method_header_printout(method_name)
-
-        # go_ahead = self._check_data(var)
-        # if not go_ahead:
         if not hasattr(self.mosaic, var):
             _print_variable_does_not_exist(method_name, var)
             if verbose:
@@ -1487,6 +1484,7 @@ class MosaicDisplay(object):
         lat, tlabel = self._parse_lat_tlabel(lat)
         index = np.round(np.abs(lat-self.mosaic.StartLat) /
                          self.mosaic.LatGridSpacing)
+        index = np.int32(index)
         xvar = self.mosaic.Longitude[index, :]
         temp_3d = getattr(self.mosaic, var)
         vcut = temp_3d[:, index, :]
@@ -1509,6 +1507,7 @@ class MosaicDisplay(object):
         lon, tlabel = self._parse_lon_tlabel(lon)
         index = np.round(np.abs(lon-self.mosaic.StartLon) /
                          self.mosaic.LonGridSpacing)
+        index = np.int32(index)
         xvar = self.mosaic.Latitude[:, index]
         temp_3d = getattr(self.mosaic, var)
         vcut = temp_3d[:, :, index]
