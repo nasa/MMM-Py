@@ -1,5 +1,11 @@
 Change Log
 ----------
+v1.5 (07/30/2015):
+1. Added Python 3.4 support. Python 2.7 is also supported.
+2. Removed scipy dependency but added the six module as a dependency.
+3. Updated the notebooks to also demo the data subsection and
+   composite output capabilities. 
+
 v1.4.3 Major changes (07/02/2015):
 1. Minor fixes to remove some compiler warnings.
 
