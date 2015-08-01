@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.4.3
-Developed & tested with Python 2.7
-Last changed 07/02/2015
+mmmpy v1.5
+Developed & tested with Python 2.7 & 3.4
+Last changed 07/31/2015
 
 
 Author
@@ -30,23 +30,27 @@ import mmmpy
 
 Notes
 -----
-Dependencies: numpy, scipy, time, os, matplotlib, Basemap, struct,
-calendar, gzip, netCDF4
+Dependencies: numpy, time, os, matplotlib, Basemap, struct,
+calendar, gzip, netCDF4, six, __future__
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap, cm
-from scipy.io import netcdf
 from netCDF4 import Dataset
 from struct import unpack
 import os
 import time
 import calendar
 import gzip
+import six
+from six.moves import range
 
-VERSION = '1.4.3'
+VERSION = '1.5'
 
 # Hard coding of constants
 DEFAULT_CLEVS = np.arange(15)*5.0
@@ -78,8 +82,8 @@ DEFAULT_DXY_SCALE = 100000
 DEFAULT_Z_SCALE = 1
 DEFAULT_MAP_SCALE = 1000
 DEFAULT_MISSING_VALUE = -99
-DEFAULT_MRMS_VARNAME = 'mosaicked_refl1     '  # 20 characters
-DEFAULT_MRMS_VARUNIT = 'dbz   '  # 6 characters
+DEFAULT_MRMS_VARNAME = b'mosaicked_refl1     '  # 20 characters
+DEFAULT_MRMS_VARUNIT = b'dbz   '  # 6 characters
 DEFAULT_FILENAME = './mrms_binary_file.dat.gz'
 
 # Following is relevant to MRMS grib2 format read/write
@@ -149,7 +153,8 @@ class MosaicTile(object):
         """
         if filename is None:
             return
-        if not isinstance(filename, basestring):
+
+        if not isinstance(filename, six.string_types):
             self.read_mosaic_grib(filename, verbose=verbose,
                                   wgrib2_path=wgrib2_path, keep_nc=keep_nc,
                                   wgrib2_name=wgrib2_name, nc_path=nc_path,
@@ -167,25 +172,24 @@ class MosaicTile(object):
                                 wgrib2_name=wgrib2_name, nc_path=nc_path,
                                 latrange=latrange, lonrange=lonrange)
                         except:
-                            print 'Unknown file format, nothing read'
-
+                            print('Unknown file format, nothing read')
             except:
-                print 'No valid filename provided'
+                print('No valid filename provided')
 
     def help(self):
         """Basic printout of module capabilities"""
         _method_header_printout('help')
-        print 'To use: instance = MosaicTile(filepath+name).'
-        print 'Available read methods:'
-        print '    read_mosaic_netcdf(<FILE>):'
-        print '    read_mosaic_binary(<FILE>):'
-        print '    read_mosaic_grib(<FILE(S)>):'
-        print 'Other available methods:'
-        print 'diag(), get_comp(),'
-        print 'subsection(), write_mosaic_binary(), output_composite()'
-        print 'To plot: display = MosaicDisplay(tile_instance)'
-        print 'Available plotting methods: plot_horiz(), plot_vert(),'
-        print '                            three_panel_plot()'
+        print('To use: instance = MosaicTile(filepath+name).')
+        print('Available read methods:')
+        print('    read_mosaic_netcdf(<FILE>):')
+        print('    read_mosaic_binary(<FILE>):')
+        print('    read_mosaic_grib(<FILE(S)>):')
+        print('Other available methods:')
+        print('diag(), get_comp(),')
+        print('subsection(), write_mosaic_binary(), output_composite()')
+        print('To plot: display = MosaicDisplay(tile_instance)')
+        print('Available plotting methods: plot_horiz(), plot_vert(),')
+        print('                            three_panel_plot()')
         _method_footer_printout()
 
     def read_mosaic_netcdf(self, full_path_and_filename, verbose=False):
@@ -199,17 +203,12 @@ class MosaicTile(object):
         method_name = 'read_mosaic_netcdf'
         if verbose:
             _method_header_printout(method_name)
-            print method_name + '(): Reading', full_path_and_filename
+            print(method_name+'(): Reading', full_path_and_filename)
         try:
-            if full_path_and_filename[-3:] == '.gz':
-                fopen = gzip.GzipFile(full_path_and_filename, 'rb')
-                fileobj = netcdf.netcdf_file(fopen, 'r')
-                fopen.close()
-            else:
-                fileobj = netcdf.netcdf_file(full_path_and_filename, 'r')
+            fileobj = Dataset(full_path_and_filename, 'r')
         except:
             if verbose:
-                print 'Not an MRMS netcdf file'
+                print('Not an MRMS netcdf file')
                 _method_footer_printout()
             return False
         # Get data and metadata
@@ -227,7 +226,7 @@ class MosaicTile(object):
         if self.Version is None:
             del self.Version
             if verbose:
-                print 'read_mosaic_netcdf(): Unknown MRMS version, cannot read'
+                print('read_mosaic_netcdf(): Unknown MRMS version, not read')
                 _method_footer_printout()
             return False
         self.Filename = os.path.basename(full_path_and_filename)
@@ -264,7 +263,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         if verbose:
             begin_time = time.time()
             _method_header_printout('read_mosaic_binary')
-            print 'Reading', full_path_and_filename
+            print('Reading', full_path_and_filename)
         # Check to see if a real MRMS binary file
         if full_path_and_filename[-3:] == '.gz':
             f = gzip.open(full_path_and_filename, 'rb')
@@ -274,7 +273,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
             self.Time = calendar.timegm(1*np.array(_fill_list(f, 6, 0)))
         except:
             if verbose:
-                print 'Not an MRMS binary file'
+                print('Not an MRMS binary file')
                 _method_footer_printout()
             return False
         if self.Time >= V1_TO_V2_CHANGEOVER_EPOCH_TIME:
@@ -319,7 +318,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         setattr(self, DEFAULT_VAR, data3d)
         # Done!
         if verbose:
-            print time.time()-begin_time, 'seconds to complete'
+            print(time.time()-begin_time, 'seconds to complete')
             _method_footer_printout()
         return True
 
@@ -351,7 +350,8 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         self.Version = 3
         self.Duration = V2_DURATION  # MRMS grib2 timing still every 2 min
         self.Filename = os.path.basename(filename[0]) if not \
-            isinstance(filename, basestring) else os.path.basename(filename)
+            isinstance(filename, six.string_types) else \
+            os.path.basename(filename)
         self.Variables = [DEFAULT_VAR]
         gribfile = MosaicGrib(filename, wgrib2_path=wgrib2_path,
                               keep_nc=keep_nc,
@@ -383,7 +383,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
             return
         else:
             if verbose:
-                print 'Computing composite field'
+                print('Computing composite field')
         temp_3d = getattr(self, var)
         temp_comp = np.amax(temp_3d, axis=0)
         setattr(self, var+'_comp', temp_comp)
@@ -397,21 +397,21 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         """
         _method_header_printout('diag')
         if not hasattr(self, DEFAULT_VAR):
-            print DEFAULT_VAR, 'does not exist, try reading in a file'
+            print(DEFAULT_VAR, 'does not exist, try reading in a file')
             _method_footer_printout()
             return
-        print 'Printing basic metadata and making a simple plot'
-        print 'Data are from', self.Filename
-        print 'Min, Max Latitude =',  np.min(self.Latitude),\
-              np.max(self.Latitude)
-        print 'Min, Max Longitude =', np.min(self.Longitude),\
-              np.max(self.Longitude)
-        print 'Heights (km) =', self.Height
-        print 'Grid shape =', np.shape(self.mrefl3d)
-        print 'Now plotting ...'
+        print('Printing basic metadata and making a simple plot')
+        print('Data are from', self.Filename)
+        print('Min, Max Latitude =',  np.min(self.Latitude),
+              np.max(self.Latitude))
+        print('Min, Max Longitude =', np.min(self.Longitude),
+              np.max(self.Longitude))
+        print('Heights (km) =', self.Height)
+        print('Grid shape =', np.shape(self.mrefl3d))
+        print('Now plotting ...')
         display = MosaicDisplay(self)
         display.plot_horiz(verbose=verbose)
-        print 'Done!'
+        print('Done!')
         _method_footer_printout()
 
     def write_mosaic_binary(self, full_path_and_filename=None, verbose=False):
@@ -435,14 +435,14 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         elif full_path_and_filename[-3:] != '.gz':
             full_path_and_filename += '.gz'
         if verbose:
-            print 'Writing MRMS binary format to', full_path_and_filename
+            print('Writing MRMS binary format to', full_path_and_filename)
         header = self._construct_header()
         data1d = self._construct_1d_data()
         output = gzip.open(full_path_and_filename, 'wb')
         output.write(header+data1d.tostring())
         output.close()
         if verbose:
-            print time.time() - begin_time, 'seconds to complete'
+            print(time.time() - begin_time, 'seconds to complete')
             _method_footer_printout()
 
     def subsection(self, latrange=None, lonrange=None, zrange=None,
@@ -457,17 +457,17 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         if verbose:
             _method_header_printout('subsection')
             if latrange and np.size(latrange) == 2:
-                print 'Latitude Range to Keep =', latrange
+                print('Latitude Range to Keep =', latrange)
             else:
-                print 'No subsectioning in Latitude'
+                print('No subsectioning in Latitude')
             if lonrange and np.size(lonrange) == 2:
-                print 'Longitude Range to Keep =', lonrange
+                print('Longitude Range to Keep =', lonrange)
             else:
-                print 'No subsectioning in Longitude'
+                print('No subsectioning in Longitude')
             if zrange and np.size(zrange) == 2:
-                print 'Height Range to Keep =', zrange
+                print('Height Range to Keep =', zrange)
             else:
-                print 'No subsectioning in Height'
+                print('No subsectioning in Height')
         self._subsection_in_latitude(latrange)
         self._subsection_in_longitude(lonrange)
         self._subsection_in_height(zrange)
@@ -491,8 +491,8 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
             return
         if not hasattr(self, var+'_comp'):
             if verbose:
-                print var+'_comp does not exist,',\
-                          'computing it with get_comp()'
+                print(var+'_comp does not exist,',
+                      'computing it with get_comp()')
             self.get_comp(var=var, verbose=verbose)
         self.subsection(zrange=[self.Height[0], self.Height[0]],
                         verbose=verbose)
@@ -537,7 +537,12 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         return lat, lon
 
     def _construct_dtype(self, NR=1):
-        """This is the structure of a complete binary MRMS file"""
+        """
+        This is the structure of a complete binary MRMS file.
+        This method breaks in Python 2.7 if you import the
+        unicode_literals module from __future__. However,
+        the method works fine under Python 3.4 as written.
+        """
         dt = np.dtype(
               [('year', 'i4'), ('month', 'i4'), ('day', 'i4'),
                ('hour', 'i4'), ('minute', 'i4'), ('second', 'i4'),
@@ -554,6 +559,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         return dt
 
     def _get_tile_number(self):
+        """Returns tile number as a string based on starting lat/lon"""
         self.Tile = '?'
         if self.Version == 1:
             if _are_equal(self.StartLat, 55.0) and \
@@ -597,7 +603,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
     def _construct_header(self):
         """This is the structure of the header of a binary MRMS file"""
         nr = np.int32(1).tostring()
-        rad_name = 'none'
+        rad_name = b'none'
         nz = np.int32(self.nz).tostring()
         nlat = np.int32(self.nlat).tostring()
         nlon = np.int32(self.nlon).tostring()
@@ -630,12 +636,12 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
         deprec5 = np.int32(1000).tostring()
         ph = 0 * np.arange(10) + 19000
         placeholder = np.int32(ph).tostring()  # 10 placeholder values
-        header = year + month + day + hour + minute + second + nlon + \
-            nlat + nz + deprec1 + map_scale + \
-            deprec2 + deprec3 + deprec4 + StartLon + StartLat + \
-            deprec5 + dlon + dlat + dxy_scale + Height + z_scale + \
-            placeholder + VarName + VarUnit + var_scale + \
-            missing + nr + rad_name
+        header = b''.join([year, month, day, hour, minute, second, nlon,
+                           nlat, nz, deprec1, map_scale,
+                           deprec2, deprec3, deprec4, StartLon, StartLat,
+                           deprec5, dlon, dlat, dxy_scale, Height, z_scale,
+                           placeholder, VarName, VarUnit, var_scale,
+                           missing, nr, rad_name])
         return header
 
     def _construct_1d_data(self):
@@ -657,7 +663,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
                                       temp > np.max(latrange))
             indices = np.where(condition)
             if np.size(indices[0]) >= self.nlat:
-                print 'Refusing to delete all data in Latitude'
+                print('Refusing to delete all data in Latitude')
             else:
                 self.Latitude = np.delete(self.Latitude, indices[0], axis=0)
                 self.Longitude = np.delete(self.Longitude, indices[0], axis=0)
@@ -672,7 +678,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
                                       temp > np.max(lonrange))
             indices = np.where(condition)
             if np.size(indices[0]) >= self.nlon:
-                print 'Refusing to delete all data in Longitude'
+                print('Refusing to delete all data in Longitude')
             else:
                 self.Latitude = np.delete(self.Latitude, indices[0], axis=1)
                 self.Longitude = np.delete(self.Longitude, indices[0], axis=1)
@@ -687,7 +693,7 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
                                       temp > np.max(zrange))
             indices = np.where(condition)
             if np.size(indices[0]) >= self.nz:
-                print 'Refusing to delete all data in Height'
+                print('Refusing to delete all data in Height')
             else:
                 self.Height = np.delete(self.Height, indices[0], axis=0)
                 self.nz = self.nz - np.size(indices[0])
@@ -756,7 +762,7 @@ class MosaicGrib(object):
         lat/lonrange = 2-element lists used to subsection grib data
                        before ingest
         """
-        if not isinstance(file_list, basestring):
+        if not isinstance(file_list, six.string_types):
             self.read_grib_list(file_list, wgrib2_path=wgrib2_path,
                                 keep_nc=keep_nc, wgrib2_name=wgrib2_name,
                                 verbose=verbose, nc_path=nc_path,
@@ -780,7 +786,7 @@ class MosaicGrib(object):
         os.system('mkdir '+TMPDIR)
         tmpf = nc_path+'default.grib2'
         nclist = []
-        for grib in file_list if not isinstance(file_list, basestring)\
+        for grib in file_list if not isinstance(file_list, six.string_types)\
                 else [file_list]:
             try:
                 # See if passed netCDFs already created by wgrib2
@@ -814,7 +820,7 @@ class MosaicGrib(object):
                         ' -netcdf ' + nc_path+gribf + '.nc; ' + 'rm -f ' + \
                         tmpf
                 if verbose:
-                    print '>>>> ', command
+                    print('>>>> ', command)
                 os.system(command)
                 if gzip_flag:
                     os.system('gzip '+grib)
@@ -825,7 +831,7 @@ class MosaicGrib(object):
         self.nclist = nclist
         self.format_data()
         if verbose:
-            print 'MosaicGrib:', time.time()-begin_time, 'seconds to run'
+            print('MosaicGrib:', time.time()-begin_time, 'seconds to run')
 
     def convert_array_to_string(self, array):
         return str(np.min(array)) + ':' + str(np.max(array))
@@ -909,34 +915,34 @@ class MosaicStitch(MosaicTile):
 
     def help(self):
         _method_header_printout('help')
-        print 'Call stitch_mosaic_tiles() function to populate variables'
-        print 'This standalone function makes use of this class\'s'
-        print 'stitch_ns() and stitch_we() methods'
-        print 'Instance = stitch_mosaic_tiles(map_array=map_array,',\
-              'direction=direction)'
-        print 'All MosaicTile() methods are available as well,'
-        print 'except read_mosaic_*() methods are disabled to avoid problems'
+        print('Call stitch_mosaic_tiles() function to populate variables')
+        print('This standalone function makes use of this class\'s')
+        print('stitch_ns() and stitch_we() methods')
+        print('Instance = stitch_mosaic_tiles(map_array=map_array,',
+              'direction=direction)')
+        print('All MosaicTile() methods are available as well,')
+        print('except read_mosaic_*() methods are disabled to avoid problems')
         _method_footer_printout()
 
     def read_mosaic_grib(self, filename, verbose=False):
         """Disabled in a MosaicStitch to avoid problems."""
         _method_header_printout('read_mosaic_grib')
-        print 'To avoid problems with reading individual MosaicTile classes'
-        print 'into a MosaicStitch, this method has been disabled'
+        print('To avoid problems with reading individual MosaicTile classes')
+        print('into a MosaicStitch, this method has been disabled')
         _method_footer_printout()
 
     def read_mosaic_netcdf(self, filename, verbose=False):
         """Disabled in a MosaicStitch to avoid problems."""
         _method_header_printout('read_mosaic_netcdf')
-        print 'To avoid problems with reading individual MosaicTile classes'
-        print 'into a MosaicStitch, this method has been disabled'
+        print('To avoid problems with reading individual MosaicTile classes')
+        print('into a MosaicStitch, this method has been disabled')
         _method_footer_printout()
 
     def read_mosaic_binary(self, filename, verbose=False):
         """Disabled in a MosaicStitch to avoid problems."""
         _method_header_printout('read_mosaic_binary')
-        print 'To avoid problems with reading individual MosaicTile classes'
-        print 'into a MosaicStitch, this method has been disabled'
+        print('To avoid problems with reading individual MosaicTile classes')
+        print('into a MosaicStitch, this method has been disabled')
         _method_footer_printout()
 
     def stitch_ns(self, n_tile=None, s_tile=None, verbose=False):
@@ -953,17 +959,17 @@ class MosaicStitch(MosaicTile):
             return
         # Check to make sure np.append() will not fail due to different grids
         if n_tile.nlon != s_tile.nlon:
-            print method_name + '(): Grid size in Longitude does not match,',\
-                  'fix this before proceeding'
+            print(method_name + '(): Grid size in Longitude does not match,',
+                  'fix this before proceeding')
             return
         inlat, index = self._stitch_radar_variables(n_tile, s_tile, verbose,
                                                     ns_flag=True)
         if index == 0:
-            print method_name + '(): No radar vars to stitch! Returning ...'
+            print(method_name + '(): No radar vars to stitch! Returning ...')
             return
         self._stitch_metadata(n_tile, s_tile, inlat, ns_flag=True)
         if verbose:
-            print 'Completed normally'
+            print('Completed normally')
             _method_footer_printout()
 
     def stitch_we(self, w_tile=None, e_tile=None, verbose=False):
@@ -980,17 +986,17 @@ class MosaicStitch(MosaicTile):
             return
         # Check to make sure np.append() will not fail due to different grids
         if w_tile.nlat != e_tile.nlat:
-            print method_name + '(): Grid size in Latitude does not match,',\
-                  'fix this before proceeding'
+            print(method_name + '(): Grid size in Latitude does not match,',
+                  'fix this before proceeding')
             return
         inlon, index = self._stitch_radar_variables(w_tile, e_tile,
                                                     ns_flag=False)
         if index == 0:
-            print method_name + '(): No radar vars to stitch! Returning ...'
+            print(method_name + '(): No radar vars to stitch! Returning ...')
             return
         self._stitch_metadata(w_tile, e_tile, inlon, ns_flag=False)
         if verbose:
-            print 'Completed normally'
+            print('Completed normally')
             _method_footer_printout()
 
     def _stitch_metadata(self, a_tile=None, b_tile=None, index=None,
@@ -1044,7 +1050,7 @@ class MosaicStitch(MosaicTile):
         for var in a_tile.Variables:
             if hasattr(a_tile, var) and hasattr(b_tile, var):
                 if verbose:
-                    print 'Stitching', var
+                    print('Stitching', var)
                 a_temp = 1.0 * getattr(a_tile, var)
                 b_temp = 1.0 * getattr(b_tile, var)
                 if ns_flag:
@@ -1122,23 +1128,25 @@ class MosaicDisplay(object):
                 _method_footer_printout()
             return
         if self.mosaic.nlon <= 1 or self.mosaic.nlat <= 1:
-            print 'Latitude or Longitude too small to plot'
+            print('Latitude or Longitude too small to plot')
             if verbose:
                 _method_footer_printout()
             return
         if verbose:
-            print 'Executing plot'
+            print('Executing plot')
         zdata, slevel = self._get_horizontal_cross_section(var, level, verbose)
-        # Note the need to transpose for plotting purposes
-        plon = np.transpose(self.mosaic.Longitude)
-        plat = np.transpose(self.mosaic.Latitude)
+        # Removed np.transpose() step from here as it was crashing
+        # map proj coordinates under Python 3.
+        plon = self.mosaic.Longitude
+        plat = self.mosaic.Latitude
         m = self._create_basemap_instance(latrange, lonrange, resolution,
                                           area_thresh)
         m = self._add_gridlines_if_desired(m, parallels, meridians, linewidth,
                                            latrange, lonrange, show_grid)
         x, y = m(plon, plat)  # compute map proj coordinates.
         # Draw filled contours
-        cs = m.contourf(x, y, zdata, clevs, cmap=cmap)
+        # Note the need to transpose for plotting purposes
+        cs = m.contourf(x.T, y.T, zdata, clevs, cmap=cmap)
         # cs = m.pcolormesh(x, y, zdata, vmin=np.min(clevs),
         #                   vmax=np.max(clevs), cmap=cmap)
         # Add colorbar, title, and save
@@ -1280,13 +1288,13 @@ class MosaicDisplay(object):
                 _method_footer_printout()
             return
         if self.mosaic.nlon <= 1 or self.mosaic.nlat <= 1:
-            print 'Latitude or Longitude too small to plot'
+            print('Latitude or Longitude too small to plot')
             if verbose:
                 _method_footer_printout()
             return
         if lat is None or lon is None:
-            print method_name + '(): Need both constant latitude and',\
-                  'constant longitude for slices'
+            print(method_name + '(): Need both constant latitude and',
+                  'constant longitude for slices')
             if verbose:
                 _method_footer_printout()
             return
@@ -1339,7 +1347,7 @@ class MosaicDisplay(object):
             index = None
         else:
             if verbose and print_flag:
-                print 'Attempting to plot cross-section thru', level, 'km MSL'
+                print('Attempting to plot cross-section thru', level, 'km MSL')
             if level < np.min(self.mosaic.Height):
                 level = np.min(self.mosaic.Height)
             elif level > np.max(self.mosaic.Height):
@@ -1348,7 +1356,7 @@ class MosaicDisplay(object):
             level = self.mosaic.Height[index]
             slevel = ' %.1f' % level + ' km MSL'
             if verbose and print_flag:
-                print 'Actually taking cross-section thru', level, 'km MSL'
+                print('Actually taking cross-section thru', level, 'km MSL')
         return slevel, index
 
     def _get_horizontal_cross_section(self, var=DEFAULT_VAR, level=None,
@@ -1356,12 +1364,12 @@ class MosaicDisplay(object):
         slevel, index = self._get_slevel(level, verbose, print_flag=True)
         if index is None:
             if verbose:
-                print 'No vertical level specified,',\
-                      'plotting composite reflectivity'
+                print('No vertical level specified,',
+                      'plotting composite reflectivity')
             if not hasattr(self.mosaic, var+'_comp'):
                 if verbose:
-                    print var+'_comp does not exist,',\
-                          'computing it with get_comp()'
+                    print(var+'_comp does not exist,',
+                          'computing it with get_comp()')
                 self.mosaic.get_comp(var=var, verbose=verbose)
             zdata = 1.0 * getattr(self.mosaic, var+'_comp')
             zdata = np.transpose(zdata)
@@ -1380,7 +1388,7 @@ class MosaicDisplay(object):
             projection='merc', lon_0=lon_0, lat_0=lat_0, lat_ts=lat_0,
             llcrnrlat=np.min(latrange), urcrnrlat=np.max(latrange),
             llcrnrlon=np.min(lonrange), urcrnrlon=np.max(lonrange),
-            rsphere=6371200., resolution=resolution, area_thresh=area_thresh)
+            resolution=resolution, area_thresh=area_thresh)
         # Draw coastlines, state and country boundaries, edge of map
         m.drawcoastlines()
         m.drawstates()
@@ -1425,25 +1433,25 @@ class MosaicDisplay(object):
         """Execute slicing, get xvar, vcut"""
         fail = [None, None, None, None, None]
         if lat is None and lon is None:
-            print 'plot_vert(): Need a constant lat or lon for slice'
+            print('plot_vert(): Need a constant lat or lon for slice')
             if verbose:
                 _method_footer_printout()
             return fail
         elif lat is not None and lon is not None:
-            print 'plot_vert(): Need either lat or lon for slice, not both!'
+            print('plot_vert(): Need either lat or lon for slice, not both!')
             if verbose:
                 _method_footer_printout()
             return fail
         else:
             if lon is None:
                 if self.mosaic.nlon <= 1:
-                    print 'Available Longitude range too small to plot'
+                    print('Available Longitude range too small to plot')
                     if verbose:
                         _method_footer_printout()
                     return fail
                 if verbose:
-                    print 'Plotting vertical cross-section thru', lat,\
-                          'deg Latitude'
+                    print('Plotting vertical cross-section thru', lat,
+                          'deg Latitude')
                 if not xrange:
                     xrange = [np.min(self.mosaic.Longitude),
                               np.max(self.mosaic.Longitude)]
@@ -1453,13 +1461,13 @@ class MosaicDisplay(object):
                     self._get_constant_latitude_cross_section(var, lat)
             if lat is None:
                 if self.mosaic.nlat <= 1:
-                    print 'Available Latitude range too small to plot'
+                    print('Available Latitude range too small to plot')
                     if verbose:
                         _method_footer_printout()
                     return fail
                 if verbose:
-                    print 'Plotting vertical cross-section thru', lon,\
-                          'deg Longitude'
+                    print('Plotting vertical cross-section thru', lon,
+                          'deg Longitude')
                 if not xrange:
                     xrange = [np.min(self.mosaic.Latitude),
                               np.max(self.mosaic.Latitude)]
@@ -1472,12 +1480,12 @@ class MosaicDisplay(object):
     def _parse_lat_tlabel(self, lat):
         if lat > np.max(self.mosaic.Latitude):
             lat = np.max(self.mosaic.Latitude)
-            print 'Outside domain, plotting instead thru',\
-                  lat, ' deg Latitude'
+            print('Outside domain, plotting instead thru',
+                  lat, ' deg Latitude')
         if lat < np.min(self.mosaic.Latitude):
             lat = np.min(self.mosaic.Latitude)
-            print 'Outside domain, plotting instead thru',\
-                  lat, 'deg Latitude'
+            print('Outside domain, plotting instead thru',
+                  lat, 'deg Latitude')
         return lat, 'Latitude = ' + '%.2f' % lat + ' deg'
 
     def _get_constant_latitude_cross_section(self, var=DEFAULT_VAR, lat=None):
@@ -1493,14 +1501,14 @@ class MosaicDisplay(object):
     def _parse_lon_tlabel(self, lon):
         if lon > np.max(self.mosaic.Longitude):
             lon = np.max(self.mosaic.Longitude)
-            print 'max', lon, np.max(self.mosaic.Longitude)
-            print 'Outside domain, plotting instead thru',\
-                  lon, ' deg Longitude'
+            print('max', lon, np.max(self.mosaic.Longitude))
+            print('Outside domain, plotting instead thru',
+                  lon, ' deg Longitude')
         if lon < np.min(self.mosaic.Longitude):
             lon = np.min(self.mosaic.Longitude)
-            print 'min', lon, np.min(self.mosaic.Longitude)
-            print 'Outside domain, plotting instead thru',\
-                  lon, 'deg Longitude'
+            print('min', lon, np.min(self.mosaic.Longitude))
+            print('Outside domain, plotting instead thru',
+                  lon, 'deg Longitude')
         return lon, 'Longitude = ' + '%.2f' % lon + ' deg'
 
     def _get_constant_longitude_cross_section(self, var=DEFAULT_VAR, lon=None):
@@ -1586,14 +1594,14 @@ def stitch_mosaic_tiles(map_array=None, direction=None, verbose=False):
             return
     # map_array fail
     elif np.ndim(map_array) < 1 or np.ndim(map_array) > 2:
-        print method_name+'(): map_array is not right,',\
-              'use 1- or 2-rank array'
+        print(method_name+'(): map_array is not right,',
+              'use 1- or 2-rank array')
         return
     # 2-D stitching in N-S and W-E
     else:
         if verbose:
-            print 'Sent a 2-D matrix, attempting to stitch in both',\
-                  'N-S and E-W directions'
+            print('Sent a 2-D matrix, attempting to stitch in both',
+                  'N-S and E-W directions')
         # Tile number fail
         if not _right_number_of_tiles(map_array):
             return
@@ -1621,11 +1629,11 @@ def compute_grid_attributes(dz3d, lat, lon, height):
     latdel = np.abs(lat[0, 0] - lat[1, 0])
     londelr = np.abs(lon[0, 1] - lon[0, 0]) * np.pi / 180.0
     sa = 0.0 * lat
-    for j in xrange(len(lat[:, 0])):
+    for j in range(len(lat[:, 0])):
         th1 = np.deg2rad(90.0 + lat[j, 0] - latdel / 2.0)
         th2 = np.deg2rad(90.0 + lat[j, 0] + latdel / 2.0)
         sa[j, :] = re**2 * londelr * (np.cos(th1) - np.cos(th2))
-        for k in xrange(len(height)):
+        for k in range(len(height)):
             if k == 0:
                 hdel = height[k]
             else:
@@ -1669,8 +1677,8 @@ def _stitch_1d_array_we(map_array=None, verbose=False,
                         method_name='stitch_mosaic_tiles'):
     result = MosaicStitch()
     if verbose:
-        print 'Sent a 1-D matrix, attempting to stitch in E-W directions'
-    for i in xrange(np.shape(map_array)[0]):
+        print('Sent a 1-D matrix, attempting to stitch in E-W directions')
+    for i in range(np.shape(map_array)[0]):
         if not hasattr(map_array[i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
             return False
@@ -1690,8 +1698,8 @@ def _stitch_1d_array_ns(map_array=None, verbose=False,
                         method_name='stitch_mosaic_tiles'):
     result = MosaicStitch()
     if verbose:
-        print 'Sent a 1-D matrix, attempting to stitch in N-S directions'
-    for i in xrange(np.shape(map_array)[0]):
+        print('Sent a 1-D matrix, attempting to stitch in N-S directions')
+    for i in range(np.shape(map_array)[0]):
         if not hasattr(map_array[i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
             return False
@@ -1711,7 +1719,7 @@ def _stitch_2d_array(map_array=None, verbose=False,
                      method_name='stitch_mosaic_tiles'):
     """Pass thru first doing N-S stitches, then E-W after"""
     ns_stitches = []
-    for i in xrange(np.shape(map_array)[1]):
+    for i in range(np.shape(map_array)[1]):
         if not hasattr(map_array[0][i], DEFAULT_VAR) or \
            not hasattr(map_array[1][i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
@@ -1729,45 +1737,45 @@ def _stitch_2d_array(map_array=None, verbose=False,
 
 
 def _method_header_printout(method_name=' '):
-    print
-    print '********************'
-    print method_name + '():'
+    print('')
+    print('********************')
+    print(method_name + '():')
 
 
 def _method_footer_printout():
-    print '********************'
-    print
+    print('********************')
+    print('')
 
 
 def _print_direction_fail(method_name=' '):
-    print method_name + '(): Sent a 1-D array but no direction to stitch!'
-    print 'Use direction=\'we\' or direction=\'ns\' in argument to fix'
+    print(method_name + '(): Sent a 1-D array but no direction to stitch!')
+    print('Use direction=\'we\' or direction=\'ns\' in argument to fix')
 
 
 def _print_missing_a_tile(method_name=' '):
-    print method_name + '(): Missing a tile, fix and try again'
+    print(method_name + '(): Missing a tile, fix and try again')
 
 
 def _print_wrong_number_of_tiles(method_name=' '):
-    print method_name + '(): Wrong number of tiles, fix and try again'
+    print(method_name + '(): Wrong number of tiles, fix and try again')
 
 
 def _print_method_done():
-    print 'Task complete, data contained as class attributes'
-    print 'Use dir(), help(), or __dict__ to find out what is available'
+    print('Task complete, data contained as class attributes')
+    print('Use dir(), help(), or __dict__ to find out what is available')
 
 
 def _print_method_called_incorrectly(method_name=' '):
-    print method_name + '(): Method called incorrectly, check syntax'
+    print(method_name + '(): Method called incorrectly, check syntax')
 
 
 def _print_variable_does_not_exist(method_name=' ', var=DEFAULT_VAR):
-    print method_name+'():', var, 'does not exist, try reading in a file'
+    print(method_name+'():', var, 'does not exist, try reading in a file')
 
 
 def _fill_list(f, size, offset):
     _list = []
-    for i in xrange(size):
+    for i in range(size):
         f.seek(i*4+offset)
         _list.append(unpack(ENDIAN+INTEGER, f.read(4))[0])
     return _list
