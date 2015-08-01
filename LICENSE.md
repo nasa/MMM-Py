@@ -5,7 +5,7 @@ THIS OPEN SOURCE AGREEMENT (“AGREEMENT”) DEFINES THE RIGHTS OF USE, REPRODUC
 Government Agency: NASA Marshall Space Flight Center 
 Government Agency Original Software Designation: MFS-33236-1
 Government Agency Original Software Title: Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-User Registration Requested.  Please visit https://github.com/nasa/mmmpy  
+User Registration Requested.  Please visit https://github.com/nasa/mmm-py  
 Government Agency Point of Contact for Original Software: timothy.j.lang@nasa.gov 
 
 
