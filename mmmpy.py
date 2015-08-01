@@ -160,8 +160,7 @@ class MosaicTile(object):
                                   wgrib2_name=wgrib2_name, nc_path=nc_path,
                                   latrange=latrange, lonrange=lonrange)
         else:
-            #try:
-            if True:
+            try:
                 flag = self.read_mosaic_binary(filename, verbose=verbose)
                 if not flag:
                     flag = self.read_mosaic_netcdf(filename, verbose=verbose)
@@ -174,7 +173,7 @@ class MosaicTile(object):
                                 latrange=latrange, lonrange=lonrange)
                         except:
                             print('Unknown file format, nothing read')
-            else:
+            except:
                 print('No valid filename provided')
 
     def help(self):
@@ -207,7 +206,6 @@ class MosaicTile(object):
             print(method_name+'(): Reading', full_path_and_filename)
         try:
             fileobj = Dataset(full_path_and_filename, 'r')
-            #fileobj = netcdf.netcdf_file(full_path_and_filename, 'r')
         except:
             if verbose:
                 print('Not an MRMS netcdf file')
@@ -228,7 +226,7 @@ class MosaicTile(object):
         if self.Version is None:
             del self.Version
             if verbose:
-                print('read_mosaic_netcdf(): Unknown MRMS version, cannot read')
+                print('read_mosaic_netcdf(): Unknown MRMS version, not read')
                 _method_footer_printout()
             return False
         self.Filename = os.path.basename(full_path_and_filename)
@@ -644,12 +642,6 @@ ftp://ftp.nssl.noaa.gov/users/langston/MRMS_REFERENCE/MRMS_BinaryFormat.pdf
                            deprec5, dlon, dlat, dxy_scale, Height, z_scale,
                            placeholder, VarName, VarUnit, var_scale,
                            missing, nr, rad_name])
-        #header = year + month + day + hour + minute + second + nlon + \
-        #    nlat + nz + deprec1 + map_scale + \
-        #    deprec2 + deprec3 + deprec4 + StartLon + StartLat + \
-        #    deprec5 + dlon + dlat + dxy_scale + Height + z_scale + \
-        #    placeholder + VarName + VarUnit + var_scale + \
-        #    missing + nr + rad_name
         return header
 
     def _construct_1d_data(self):
@@ -1143,9 +1135,8 @@ class MosaicDisplay(object):
         if verbose:
             print('Executing plot')
         zdata, slevel = self._get_horizontal_cross_section(var, level, verbose)
-        # Note the need to transpose for plotting purposes
-        #plon = np.transpose(self.mosaic.Longitude)
-        #plat = np.transpose(self.mosaic.Latitude)
+        # Removed np.transpose() step from here as it was crashing
+        # map proj coordinates under Python 3.
         plon = self.mosaic.Longitude
         plat = self.mosaic.Latitude
         m = self._create_basemap_instance(latrange, lonrange, resolution,
@@ -1154,6 +1145,7 @@ class MosaicDisplay(object):
                                            latrange, lonrange, show_grid)
         x, y = m(plon, plat)  # compute map proj coordinates.
         # Draw filled contours
+        # Note the need to transpose for plotting purposes
         cs = m.contourf(x.T, y.T, zdata, clevs, cmap=cmap)
         # cs = m.pcolormesh(x, y, zdata, vmin=np.min(clevs),
         #                   vmax=np.max(clevs), cmap=cmap)
