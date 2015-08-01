@@ -20,13 +20,13 @@ https://docs.google.com/document/d/1LeVcn_taIXZgzZb5JgWqaVr0xVs7GmA6RpHcb8ZGiwk/
 MMM-Py Installation
 -------------------
 
-MMM-Py works under Python 2.x on most Mac/Linux setups. Windows installation is currently untested.
+MMM-Py works under Python 2.7 and 3.4 on most Mac/Linux setups. Windows installation is currently untested.
 
 Put mmmpy.py in your PYTHONPATH
 
 You'll need the following Python packages. Most are easily obtained or already installed
 with common Python frameworks such as Anaconda (http://continuum.io/downloads):
-numpy, matplotlib, scipy, netCDF4, os, Basemap, struct, time, calendar, gzip 
+numpy, matplotlib, six, netCDF4, os, Basemap, struct, time, calendar, gzip 
 
 Get MRMS-modified wgrib2 package from here
 ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz
