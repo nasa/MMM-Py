@@ -13,7 +13,7 @@ own, which MMM-Py can ingest later. MMM-Py is free and open source. It is capabl
 producing publication-ready figures and analyses, but it also can do quicklook plots so 
 you can check out the cool storm that just happened.
 
-For more info about the latest version of MRMS, see:
+For more info about the latest version of MRMS, see:<br>
 https://docs.google.com/document/d/1LeVcn_taIXZgzZb5JgWqaVr0xVs7GmA6RpHcb8ZGiwk/edit
 
 
@@ -41,12 +41,12 @@ Without wgrib2 MMM-Py can still read legacy MRMS binaries and netCDFs.
 Using MMM-Py
 ------------
 
-To access everything:
+To access everything:<br>
 import mmmpy
 
 To see MMM-Py in action, check out the IPython notebooks provided in this distribution.
 
-The following conference presentation discusses MMM-Py (among other modules):
+The following conference presentation discusses MMM-Py (among other modules):<br>
 https://ams.confex.com/ams/95Annual/webprogram/Paper262779.html 
 
 MMM-Py was developed at the NASA Marshall Space Flight Center by Timothy Lang (timothy.j.lang@nasa.gov)

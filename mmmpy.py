@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.5
+mmmpy v1.5.1
 Developed & tested with Python 2.7 & 3.4
-Last changed 07/31/2015
+Last changed 08/10/2015
 
 
 Author
@@ -48,9 +48,8 @@ import time
 import calendar
 import gzip
 import six
-from six.moves import range
 
-VERSION = '1.5'
+VERSION = '1.5.1'
 
 # Hard coding of constants
 DEFAULT_CLEVS = np.arange(15)*5.0
@@ -729,10 +728,12 @@ class NetcdfFile(object):
         self.fill_variables(volume)
 
     def fill_variables(self, volume):
-        self.variable_list = volume.variables.keys()
-        for key in self.variable_list:
+        """Loop thru all variables and store them as attributes"""
+        self.variable_list = []
+        for key in volume.variables.keys():
             new_var = np.array(volume.variables[key][:])
             setattr(self, key, new_var)
+            self.variable_list.append(key)
 
 ###################################################
 # MosaicGrib class
@@ -1629,11 +1630,11 @@ def compute_grid_attributes(dz3d, lat, lon, height):
     latdel = np.abs(lat[0, 0] - lat[1, 0])
     londelr = np.abs(lon[0, 1] - lon[0, 0]) * np.pi / 180.0
     sa = 0.0 * lat
-    for j in range(len(lat[:, 0])):
+    for j in np.arange(len(lat[:, 0])):
         th1 = np.deg2rad(90.0 + lat[j, 0] - latdel / 2.0)
         th2 = np.deg2rad(90.0 + lat[j, 0] + latdel / 2.0)
         sa[j, :] = re**2 * londelr * (np.cos(th1) - np.cos(th2))
-        for k in range(len(height)):
+        for k in np.arange(len(height)):
             if k == 0:
                 hdel = height[k]
             else:
@@ -1678,7 +1679,7 @@ def _stitch_1d_array_we(map_array=None, verbose=False,
     result = MosaicStitch()
     if verbose:
         print('Sent a 1-D matrix, attempting to stitch in E-W directions')
-    for i in range(np.shape(map_array)[0]):
+    for i in np.arange(np.shape(map_array)[0]):
         if not hasattr(map_array[i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
             return False
@@ -1699,7 +1700,7 @@ def _stitch_1d_array_ns(map_array=None, verbose=False,
     result = MosaicStitch()
     if verbose:
         print('Sent a 1-D matrix, attempting to stitch in N-S directions')
-    for i in range(np.shape(map_array)[0]):
+    for i in np.arange(np.shape(map_array)[0]):
         if not hasattr(map_array[i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
             return False
@@ -1719,7 +1720,7 @@ def _stitch_2d_array(map_array=None, verbose=False,
                      method_name='stitch_mosaic_tiles'):
     """Pass thru first doing N-S stitches, then E-W after"""
     ns_stitches = []
-    for i in range(np.shape(map_array)[1]):
+    for i in np.arange(np.shape(map_array)[1]):
         if not hasattr(map_array[0][i], DEFAULT_VAR) or \
            not hasattr(map_array[1][i], DEFAULT_VAR):
             _print_missing_a_tile(method_name)
@@ -1775,7 +1776,7 @@ def _print_variable_does_not_exist(method_name=' ', var=DEFAULT_VAR):
 
 def _fill_list(f, size, offset):
     _list = []
-    for i in range(size):
+    for i in np.arange(size):
         f.seek(i*4+offset)
         _list.append(unpack(ENDIAN+INTEGER, f.read(4))[0])
     return _list
