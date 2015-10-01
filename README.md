@@ -13,8 +13,7 @@ own, which MMM-Py can ingest later. MMM-Py is free and open source. It is capabl
 producing publication-ready figures and analyses, but it also can do quicklook plots so 
 you can check out the cool storm that just happened.
 
-For more info about the latest version of MRMS, see:<br>
-https://docs.google.com/document/d/1LeVcn_taIXZgzZb5JgWqaVr0xVs7GmA6RpHcb8ZGiwk/edit
+For more info about the latest version of MRMS, see [here.](https://docs.google.com/document/d/1LeVcn_taIXZgzZb5JgWqaVr0xVs7GmA6RpHcb8ZGiwk/edit)
 
 
 MMM-Py Installation
@@ -22,32 +21,31 @@ MMM-Py Installation
 
 MMM-Py works under Python 2.7 and 3.4 on most Mac/Linux setups. Windows installation is currently untested.
 
-Put mmmpy.py in your PYTHONPATH
+Put `mmmpy.py` in your `PYTHONPATH`.
 
 You'll need the following Python packages. Most are easily obtained or already installed
-with common Python frameworks such as Anaconda (http://continuum.io/downloads):
-numpy, matplotlib, six, netCDF4, os, Basemap, struct, time, calendar, gzip 
+with common Python frameworks such as [Anaconda](http://continuum.io/downloads):
+`numpy`, `matplotlib`, `six`, `netCDF4`, `os`, `Basemap`, `struct`, `time`, `calendar`, `gzip` 
 
-Get MRMS-modified wgrib2 package from here
-ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz
+Get MRMS-modified wgrib2 package from [here] (ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz)
 
-Install wgrib2 and note the path to it. Modify the BASE_PATH, TMPDIR, WGRIB2_PATH, and WGRIB2_NAME 
-global variables in mmmpy.py as necessary. TMPDIR is where intermediate netCDFs created by wgrib2
+Install `wgrib2` and note the path to it. Modify the `BASE_PATH`, `TMPDIR`, `WGRIB2_PATH`, and `WGRIB2_NAME` 
+global variables in `mmmpy.py` as necessary. `TMPDIR` is where intermediate netCDFs created by `wgrib2`
 will go.
 
-Without wgrib2 MMM-Py can still read legacy MRMS binaries and netCDFs. 
+Without `wgrib2` MMM-Py can still read legacy MRMS binaries and netCDFs. 
 
 
 Using MMM-Py
 ------------
 
-To access everything:<br>
+To access everything:
+```
 import mmmpy
-
+```
 To see MMM-Py in action, check out the IPython notebooks provided in this distribution.
 
-The following conference presentation discusses MMM-Py (among other modules):<br>
-https://ams.confex.com/ams/95Annual/webprogram/Paper262779.html 
+This [conference presentation](https://ams.confex.com/ams/95Annual/webprogram/Paper262779.html) discusses MMM-Py (among other modules).
 
 MMM-Py was developed at the NASA Marshall Space Flight Center by Timothy Lang (timothy.j.lang@nasa.gov)
 
