@@ -1,5 +1,9 @@
 Change Log
 ----------
+v1.5.1 (08/10/2015):
+1. Updated NetcdfFile class to be more Python 3 compatible.
+2. Removed need for range function from six.moves.
+
 v1.5 (07/30/2015):
 1. Added Python 3.4 support. Python 2.7 is also supported.
 2. Removed scipy dependency but added the six module as a dependency.
