@@ -27,7 +27,7 @@ You'll need the following Python packages. Most are easily obtained or already i
 with common Python frameworks such as [Anaconda](http://continuum.io/downloads):
 `numpy`, `matplotlib`, `six`, `netCDF4`, `os`, `Basemap`, `struct`, `time`, `calendar`, `gzip` 
 
-Get MRMS-modified wgrib2 package and installation info from [here](ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz)
+Get MRMS-modified wgrib2 package and installation info from ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz
 
 Install `wgrib2` and note the path to it. Modify the `BASE_PATH`, `TMPDIR`, `WGRIB2_PATH`, and `WGRIB2_NAME` 
 global variables in `mmmpy.py` as necessary. `TMPDIR` is where intermediate netCDFs created by `wgrib2`
