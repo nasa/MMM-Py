@@ -1091,10 +1091,11 @@ class MosaicDisplay(object):
                    lonrange=DEFAULT_LONRANGE, resolution='l',
                    level=None, parallels=DEFAULT_PARALLELS, area_thresh=10000,
                    meridians=DEFAULT_MERIDIANS, title=None,
-                   clevs=DEFAULT_CLEVS,
+                   clevs=DEFAULT_CLEVS, basemap=None, embellish=True,
                    cmap=DEFAULT_CMAP, save=None, show_grid=True,
                    linewidth=DEFAULT_LINEWIDTH, fig=None, ax=None,
-                   verbose=False, return_flag=False, colorbar_flag=True):
+                   verbose=False, return_flag=False, colorbar_flag=True,
+                   colorbar_loc='bottom'):
         """
         Plots a basemap projection with a plan view of the mosaic radar data.
         The projection can be used to incorporate other data into figure
@@ -1111,6 +1112,9 @@ class MosaicDisplay(object):
                 So if you want a blank title use title='' as keyword.
         clevs = Desired contour levels.
         cmap = Desired color map.
+        basemap = Assign to basemap you want to use.
+        embellish = Set to false to suppress basemap changes.
+        colorbar_loc = Options: 'bottom', 'top', 'right', 'left'
         save = File to save image to. Careful, PS/EPS/PDF can get large!
         verbose = Set to True if you want a lot of text for debugging.
         resolution = Resolution of Basemap instance (e.g., 'c', 'l', 'i', 'h')
@@ -1139,10 +1143,15 @@ class MosaicDisplay(object):
         # map proj coordinates under Python 3.
         plon = self.mosaic.Longitude
         plat = self.mosaic.Latitude
-        m = self._create_basemap_instance(latrange, lonrange, resolution,
-                                          area_thresh)
-        m = self._add_gridlines_if_desired(m, parallels, meridians, linewidth,
-                                           latrange, lonrange, show_grid)
+        if basemap is None:
+            m = self._create_basemap_instance(latrange, lonrange, resolution,
+                                              area_thresh)
+        else:
+            m = basemap
+        if embellish:
+            m = self._add_gridlines_if_desired(
+                m, parallels, meridians, linewidth,
+                latrange, lonrange, show_grid)
         x, y = m(plon, plat)  # compute map proj coordinates.
         # Draw filled contours
         # Note the need to transpose for plotting purposes
@@ -1151,7 +1160,7 @@ class MosaicDisplay(object):
         #                   vmax=np.max(clevs), cmap=cmap)
         # Add colorbar, title, and save
         if colorbar_flag:
-            cbar = m.colorbar(cs, location='bottom', pad="7%")
+            cbar = m.colorbar(cs, location=colorbar_loc, pad="7%")
             if var == DEFAULT_VAR:
                 cbar.set_label(DEFAULT_VAR_LABEL)
             else:
