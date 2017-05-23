@@ -1,5 +1,13 @@
 Change Log
 ----------
+v1.6 (05/23/2017):
+1. Added capability to directly ingest grib-format mosaics via pygrib. This required
+   extensive additions to mummy.MosaicGrib.
+2. Added dependencies - datetime, pygrib (optional).
+3. Minor code formatting and aesthetic updates.
+4. Added a notebook to demo direct grib2 download and ingest, as well as display
+   of data using cartopy.
+
 v1.5.1 (08/10/2015):
 1. Updated NetcdfFile class to be more Python 3 compatible.
 2. Removed need for range function from six.moves.
