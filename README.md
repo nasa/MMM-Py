@@ -25,7 +25,9 @@ Put `mmmpy.py` in your `PYTHONPATH`.
 
 You'll need the following Python packages. Most are easily obtained or already installed
 with common Python frameworks such as [Anaconda](http://continuum.io/downloads):
-`numpy`, `matplotlib`, `six`, `netCDF4`, `os`, `Basemap`, `struct`, `time`, `calendar`, `gzip` 
+`numpy`, `matplotlib`, `six`, `netCDF4`, `os`, `Basemap`, `struct`, `time`, `calendar`, `gzip`, `datetime`
+
+You may also want to install `pygrib` from [here](https://pypi.python.org/pypi/pygrib). This is an optional dependency.
 
 Get MRMS-modified wgrib2 package and installation info from ftp://ftp.nssl.noaa.gov/projects/MRMS/GRIB2_DECODERS/MRMS_modified_wgrib2_v2.0.1-selectfiles.tgz
 
@@ -33,7 +35,7 @@ Install `wgrib2` and note the path to it. Modify the `BASE_PATH`, `TMPDIR`, `WGR
 global variables in `mmmpy.py` as necessary. `TMPDIR` is where intermediate netCDFs created by `wgrib2`
 will go.
 
-Without `wgrib2` MMM-Py can still read legacy MRMS binaries and netCDFs. 
+Without `wgrib2` or `pygrib`, MMM-Py can still read legacy MRMS binaries and netCDFs. The `pygrib` module will obviate the need to install `wgrib2`, as it enables direct ingest of the grib2 files without converting to netCDF.
 
 
 Using MMM-Py

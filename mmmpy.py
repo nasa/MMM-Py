@@ -2,9 +2,9 @@
 Title/Version
 -------------
 Marshall MRMS Mosaic Python Toolkit (MMM-Py)
-mmmpy v1.5.1
+mmmpy v1.6
 Developed & tested with Python 2.7 & 3.4
-Last changed 08/10/2015
+Last changed 05/23/2017
 
 
 Author
@@ -31,8 +31,8 @@ import mmmpy
 Notes
 -----
 Dependencies: numpy, time, os, matplotlib, Basemap, struct,
-calendar, gzip, netCDF4, six, __future__
-
+calendar, gzip, netCDF4, six, __future__, datetime
+Optional: pygrib
 """
 
 from __future__ import absolute_import
@@ -40,6 +40,7 @@ from __future__ import division
 from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
+import datetime
 from mpl_toolkits.basemap import Basemap, cm
 from netCDF4 import Dataset
 from struct import unpack
@@ -48,11 +49,16 @@ import time
 import calendar
 import gzip
 import six
+try:
+    import pygrib
+    IMPORT_FLAG = True
+except ImportError:
+    IMPORT_FLAG = False
 
-VERSION = '1.5.1'
+VERSION = '1.6'
 
 # Hard coding of constants
-DEFAULT_CLEVS = np.arange(15)*5.0
+DEFAULT_CLEVS = np.arange(15) * 5.0
 DEFAULT_VAR = 'mrefl3d'
 DEFAULT_VAR_LABEL = 'Reflectivity (dBZ)'
 V1_DURATION = 300.0  # seconds
@@ -779,13 +785,15 @@ class MosaicGrib(object):
         """
         Actual reading of grib2 and netCDF files occurs here.
         Input arguments and keywords same as __init__() method.
+        Now capable of ingesting grib2 directly via pygrib.
         """
         if verbose:
             begin_time = time.time()
         # Make the directory where netCDFs will be stored
-        os.system('mkdir '+TMPDIR)
-        tmpf = nc_path+'default.grib2'
+        os.system('mkdir ' + TMPDIR)
+        tmpf = nc_path + 'default.grib2'
         nclist = []
+        gblist = []
         for grib in file_list if not isinstance(file_list, six.string_types)\
                 else [file_list]:
             try:
@@ -797,41 +805,51 @@ class MosaicGrib(object):
                 # Can try to decompress if gzipped
                 gzip_flag = False
                 if grib[-3:] == '.gz':
-                    os.system('gzip -d '+grib)
+                    os.system('gzip -d ' + grib)
                     grib = grib[0:-3]
                     gzip_flag = True
                 # wgrib2 call is made via os.system()
                 gribf = os.path.basename(grib)
-                if latrange is None and lonrange is None:
-                    command = wgrib2_path + wgrib2_name + ' ' + grib + \
-                        ' -netcdf ' + nc_path+gribf + '.nc'
-                # Subsectioning before reading
+                if IMPORT_FLAG:
+                    if verbose:
+                        print('Reading', gribf)
+                    gr = pygrib.open(grib)
+                    gblist.append(gr)
                 else:
-                    if latrange is None and lonrange is not None:
-                        latrange = MRMS_V3_LATRANGE
-                    elif latrange is not None and lonrange is None:
-                        lonrange = MRMS_V3_LONRANGE
-                    slat = self.convert_array_to_string(latrange)
-                    slon = self.convert_array_to_string(
-                        np.array(lonrange) + 360.0)
-                    command = wgrib2_path + wgrib2_name + ' ' + grib + \
-                        ' -small_grib ' + slon + ' ' + slat + ' ' + tmpf + \
-                        '; ' + wgrib2_path + wgrib2_name + ' ' + tmpf + \
-                        ' -netcdf ' + nc_path+gribf + '.nc; ' + 'rm -f ' + \
-                        tmpf
-                if verbose:
-                    print('>>>> ', command)
-                os.system(command)
+                    if latrange is None and lonrange is None:
+                        command = wgrib2_path + wgrib2_name + ' ' + grib + \
+                            ' -netcdf ' + nc_path+gribf + '.nc'
+                    # Subsectioning before reading
+                    else:
+                        if latrange is None and lonrange is not None:
+                            latrange = MRMS_V3_LATRANGE
+                        elif latrange is not None and lonrange is None:
+                            lonrange = MRMS_V3_LONRANGE
+                        slat = self.convert_array_to_string(latrange)
+                        slon = self.convert_array_to_string(
+                            np.array(lonrange) + 360.0)
+                        command = wgrib2_path + wgrib2_name + ' ' + grib + \
+                            ' -small_grib ' + slon + ' ' + slat + ' ' + \
+                            tmpf + '; ' + wgrib2_path + wgrib2_name + ' ' + \
+                            tmpf + ' -netcdf ' + nc_path+gribf + '.nc; ' + \
+                            'rm -f ' + tmpf
+                    if verbose:
+                        print('>>>> ', command)
+                    os.system(command)
+                    # Here the output netCDF is actually read
+                    nclist.append(NetcdfFile(nc_path + gribf + '.nc'))
+                    if not keep_nc:
+                        os.system('rm -f ' + nc_path + gribf + '.nc')
                 if gzip_flag:
-                    os.system('gzip '+grib)
-                # Here the output netCDF is actually read
-                nclist.append(NetcdfFile(nc_path+gribf+'.nc'))
-                if not keep_nc:
-                    os.system('rm -f '+nc_path+gribf+'.nc')
-        self.nclist = nclist
-        self.format_data()
+                    os.system('gzip ' + grib)
+        if IMPORT_FLAG:
+            self.gblist = gblist
+            self.format_grib_data()
+        else:
+            self.nclist = nclist
+            self.format_netcdf_data()
         if verbose:
-            print('MosaicGrib:', time.time()-begin_time, 'seconds to run')
+            print('MosaicGrib:', time.time() - begin_time, 'seconds to run')
 
     def convert_array_to_string(self, array):
         return str(np.min(array)) + ':' + str(np.max(array))
@@ -858,7 +876,43 @@ class MosaicGrib(object):
             if var[0:5] == 'CONUS':
                 return getattr(ncfile, var)
 
-    def format_data(self):
+    def format_grib_data(self):
+        """
+        This method takes a list of ingested grib files and formats the data
+        to match the MMM-Py model.
+        """
+        height = []
+        refstore = []
+        for i, gr in enumerate(self.gblist):
+            grb = gr[1]
+            if i == 0:
+                lat, lon = grb.latlons()
+                self.Longitude = lon - 360.0
+                self.Latitude = lat
+                self.LatGridSpacing = np.round(np.abs(
+                    self.Latitude[0, 0] - self.Latitude[1, 0]), decimals=2)
+                self.LonGridSpacing = np.round(np.abs(
+                    self.Longitude[0, 1] - self.Longitude[0, 0]), decimals=2)
+                self.StartLat = np.max(self.Latitude)
+                self.StartLon = np.min(self.Longitude)
+                dtgrb = datetime.datetime.strptime(
+                    str(grb['dataDate']) + str(grb['dataTime']), '%Y%m%d%H%M')
+                self.Time = (dtgrb -
+                             datetime.datetime(1970, 1, 1)).total_seconds()
+                mrefl3d = np.zeros(
+                    (np.size(self.gblist), np.shape(self.Latitude)[0],
+                     np.shape(self.Longitude)[1]), dtype='float')
+            refstore.append(1.0 * grb['values'])
+            height.append(grb['level'] / 1000.0)
+            gr.close()
+        self.Height = np.array(height)[np.argsort(height)]
+        for index in np.argsort(height):
+            mrefl3d[index, :, :] = refstore[index][:, :]
+        self.nz, self.nlat, self.nlon = np.shape(mrefl3d)
+        setattr(self, DEFAULT_VAR, mrefl3d)
+        del self.gblist
+
+    def format_netcdf_data(self):
         """
         Method to group all the reflectivity 2D planes into a 3D array.
         Also populates attributes that will be necessary for MosaicTile.
@@ -1584,7 +1638,7 @@ def stitch_mosaic_tiles(map_array=None, direction=None, verbose=False):
     # 1-D stitching, either N-S or W-E
     if np.ndim(map_array) == 1:
         # direction unset or not a string = direction fail
-        if direction is None or isinstance(direction, str) == False:
+        if direction is None or isinstance(direction, str) is False:
             _print_direction_fail(method_name)
             return
         # E-W Stitching only
