@@ -77,7 +77,7 @@ DEFAULT_LATLABEL = 'Latitude (deg)'
 DEFAULT_ZLABEL = 'Height (km MSL)'
 DEFAULT_LATRANGE = [20, 55]
 DEFAULT_LONRANGE = [-130, -60]
-DEFAULT_LINEWIDTH = 0
+DEFAULT_LINEWIDTH = 0.1
 
 # Following is relevant to MRMS binary format read/write methods
 ENDIAN = ''  # Endian currently set automatically by machine type
