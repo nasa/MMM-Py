@@ -19,7 +19,7 @@ For more info about the latest version of MRMS, see [here.](https://docs.google.
 MMM-Py Installation
 -------------------
 
-MMM-Py works under Python 2.7 and 3.4 on most Mac/Linux setups. Windows installation is currently untested.
+MMM-Py works under Python 2.7 and 3.4-3.6 on most Mac/Linux setups. Windows installation is currently untested.
 
 Put `mmmpy.py` in your `PYTHONPATH`.
 
