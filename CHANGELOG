@@ -1,5 +1,10 @@
 Change Log
 ----------
+v1.7 (08/15/2022): modified by - Jason Leaver
+1. added development container with cartopy
+2. TODO: remove basemap requirement
+3. TODO: package code in subdirs
+
 v1.6 (05/23/2017):
 1. Added capability to directly ingest grib-format mosaics via pygrib. This required
    extensive additions to mummy.MosaicGrib.

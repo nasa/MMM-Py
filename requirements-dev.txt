@@ -1,0 +1,10 @@
+black==22.6.0
+flake8==5.0.4
+iniconfig==1.1.1
+ipykernel==6.15.1
+ipython==7.34.0
+jupyter-black==0.3.1
+jupyter-client==7.3.4
+jupyter-core==4.11.1
+pyright==1.1.266
+pytest==7.1.2

@@ -1,0 +1,68 @@
+{
+	"name": "GribLib",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "..",
+		"args": {
+			// Options
+			// "NODE_VERSION": "lts/*"
+		}
+	},
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				// python
+				"python.defaultInterpreterPath": "/opt/venv/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true,
+				"python.formatting.provider": "black",
+				"python.formatting.blackPath": "/opt/venv/bin/black",
+				"python.linting.flake8Path": "/opt/venv/bin/flake8",
+				"python.linting.mypyPath": "/opt/venv/bin/mypy",
+				"python.linting.pylintPath": "/opt/venv/pylint",
+				// 
+				"vsicons.associations.folders": [
+					{
+						"icon": "python",
+						"extensions": [
+							"notebooks"
+						],
+						"format": "svg",
+						"overrides": "ipynb"
+					}
+				]
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				// python
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-toolsai.jupyter",
+				// linting
+				"mikestead.dotenv",
+				"redhat.vscode-yaml",
+				"bungcip.better-toml",
+				"shanoor.vscode-nginx",
+				"oderwat.indent-rainbow",
+				// git
+				"eamodio.gitlens",
+				// vscode
+				"vscode-icons-team.vscode-icons"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": []
+	"runArgs": [
+		// "--gpus=all"
+	],
+	// development path options
+	"remoteEnv": {
+		"PYTHONPATH": "/workspaces/MMM-Py/:${containerEnv:PYTHONPATH}:",
+		"JUPYTER_PATH": "/workspaces/MMM-Py/:${containerEnv:JUPYTER_PATH}"
+	},
+	"remoteUser": "vscode"
+}
